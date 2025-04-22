@@ -34,7 +34,7 @@ public class DepartmentService {
     }
 
     public DepartmentDto createDepartment(DepartmentDto departmentDto) {
-        boolean exists = departmentRepository.findById(departmentDto.getId()).isPresent();
+        boolean exists = departmentRepository.findByNameIgnoreCase(departmentDto.getName()).isPresent();
         if (exists) throw new DepartmentAlreadyExistsException("Department already exists");
 
         Department newDepartment = departmentMapper.toEntity(departmentDto);
@@ -44,12 +44,18 @@ public class DepartmentService {
         return departmentMapper.toDto(departmentRepository.save(newDepartment));
     }
 
-    public boolean updateDepartment(Long id, DepartmentDto dto) {
-        Department existing = departmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+    public boolean updateDepartment(DepartmentDto departmentDto) {
+        boolean exists = departmentRepository.findByNameIgnoreCase(departmentDto.getName()).isPresent();
+//        departmentOpt.ifPresent(department -> {
+//            throw new DepartmentAlreadyExistsException("Department already exists");
+//        });
 
-        dto.setId(id);
-        Department updated = departmentMapper.toEntity(dto);
+//
+//        Department existing = departmentRepository.findById(id)
+//                .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+//
+//        dto.setId(id);
+        Department updated = departmentMapper.toEntity(departmentDto);
         departmentRepository.save(updated);
         return true;
     }

@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +25,14 @@ import java.util.List;
 )
 @RestController
 @RequestMapping(path = "/api/departments", produces = {MediaType.APPLICATION_JSON_VALUE})
-@RequiredArgsConstructor
 public class DepartmentController {
 
     private final DepartmentService departmentService;
+
+    public DepartmentController(DepartmentService departmentService) {
+        this.departmentService = departmentService;
+    }
+
     @Operation(
             summary = "Fetch List of departments Details REST API",
             description = "REST API to fetch List of departments Details by ID"
@@ -46,14 +50,14 @@ public class DepartmentController {
                     )
             )
     })
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<DepartmentDto>> getAll() {
-//        return departmentService.getAllDepartments();
         List<DepartmentDto> departments = departmentService.getAllDepartments();
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(departments);
     }
+
     @Operation(
             summary = "Fetch Department Details REST API",
             description = "REST API to fetch Department Details by ID"
@@ -73,7 +77,6 @@ public class DepartmentController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentDto> getById(@PathVariable Long id) {
-//        return ResponseEntity.ok(departmentService.getDepartmentById(id));
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(departmentService.getDepartmentById(id));
@@ -97,7 +100,6 @@ public class DepartmentController {
     })
     @PostMapping
     public ResponseEntity<ResponseDto> create(@RequestBody DepartmentDto dto) {
-//        return new ResponseEntity<>(departmentService.createDepartment(dto), HttpStatus.CREATED);
         departmentService.createDepartment(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -124,10 +126,12 @@ public class DepartmentController {
                     )
             )
     })
-    @PutMapping("/{id}")
-    public ResponseEntity<ResponseDto> update(@PathVariable Long id, @RequestBody DepartmentDto dto) {
+    @PutMapping
+    public ResponseEntity<ResponseDto> update( @RequestBody DepartmentDto dto) {
 //        return ResponseEntity.ok(departmentService.updateDepartment(id, dto));
-        boolean isUpdated = departmentService.updateDepartment(id, dto);
+        boolean isUpdated = departmentService.updateDepartment(dto);
+//        var ok = isUpdated ? HttpStatus.OK : HttpStatus.EXPECTATION_FAILED;
+
         if(isUpdated) {
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -138,6 +142,7 @@ public class DepartmentController {
                     .body(new ResponseDto(ProjectConstants.STATUS_417, ProjectConstants.MESSAGE_417_UPDATE));
         }
     }
+
     @Operation(
             summary = "Delete Department Details REST API",
             description = "REST API to delete Department details based on id"

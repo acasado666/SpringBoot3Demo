@@ -16,7 +16,7 @@ public interface EmployeeMapper extends BaseMapper {
     @Mapping(source = "department.name", target = "departmentName") // Map nested FK
     EmployeeDto toDto(Employee employee);
 
-    @Mapping(source = "departmentId", target = "department.id")  // optional, or handle manually
+//    @Mapping(source = "departmentId", target = "department.id")  // optional, or handle manually
     Employee toEntity(EmployeeDto employeeDto);
 
     List<EmployeeDto> toDtoList(List<Employee> employees);
