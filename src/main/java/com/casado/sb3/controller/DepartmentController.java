@@ -27,7 +27,7 @@ import java.util.List;
 @RequestMapping(path = "/api/departments", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class DepartmentController {
 
-    private final DepartmentService departmentService;
+    private DepartmentService departmentService;
 
     public DepartmentController(DepartmentService departmentService) {
         this.departmentService = departmentService;
@@ -76,11 +76,12 @@ public class DepartmentController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<DepartmentDto> getById(@PathVariable Long id) {
+    public ResponseEntity<DepartmentDto> getDepartmentById(@PathVariable Long id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(departmentService.getDepartmentById(id));
     }
+
     @Operation(
             summary = "Create Department REST API",
             description = "REST API to create new Department Details"
@@ -99,7 +100,7 @@ public class DepartmentController {
             )
     })
     @PostMapping
-    public ResponseEntity<ResponseDto> create(@RequestBody DepartmentDto dto) {
+    public ResponseEntity<ResponseDto> createDepartment(@RequestBody DepartmentDto dto) {
         departmentService.createDepartment(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -127,10 +128,8 @@ public class DepartmentController {
             )
     })
     @PutMapping
-    public ResponseEntity<ResponseDto> update( @RequestBody DepartmentDto dto) {
-//        return ResponseEntity.ok(departmentService.updateDepartment(id, dto));
+    public ResponseEntity<ResponseDto> updateDepartment( @RequestBody DepartmentDto dto) {
         boolean isUpdated = departmentService.updateDepartment(dto);
-//        var ok = isUpdated ? HttpStatus.OK : HttpStatus.EXPECTATION_FAILED;
 
         if(isUpdated) {
             return ResponseEntity
@@ -166,8 +165,7 @@ public class DepartmentController {
     }
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseDto> delete(@PathVariable Long id) {
-//        return ResponseEntity.noContent().build();
+    public ResponseEntity<ResponseDto> deleteDepartment(@PathVariable Long id) {
         boolean isDeleted = departmentService.deleteDepartment(id);
         if(isDeleted) {
             return ResponseEntity

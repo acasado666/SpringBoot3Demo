@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +29,15 @@ import java.util.List;
 @RequestMapping(path = "/api/employees", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class EmployeeController {
 
-    private final EmployeeService employeeService;
+    private  EmployeeService employeeService;
 
     public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
     @Operation(
-            summary = "Fetch List of employees Details REST API",
-            description = "REST API to fetch List of employees Details by ID"
+            summary = "Fetch List of all employees Details REST API",
+            description = "REST API to fetch List of all employees Details by ID"
     )
     @ApiResponses({
             @ApiResponse(
@@ -51,7 +53,7 @@ public class EmployeeController {
             )
     })
     @GetMapping("/all")
-    public ResponseEntity<List<EmployeeDto>> getAll() {
+    public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
         List<EmployeeDto> employees = employeeService.getAllEmployees();
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -59,8 +61,8 @@ public class EmployeeController {
     }
 
     @Operation(
-            summary = "Fetch employee Details REST API by name and last name",
-            description = "REST API to fetch employees details by name"
+            summary = "Fetch employee details REST API by ID",
+            description = "REST API to fetch employees details by ID"
     )
     @ApiResponses({
             @ApiResponse(
@@ -75,10 +77,35 @@ public class EmployeeController {
                     )
             )
     })
-    @GetMapping("/name")
-    public ResponseEntity<EmployeeDto> getEmployee(
-            @RequestParam String name,
-            @RequestParam String lastName) {
+    @GetMapping("/fetchById")
+    public ResponseEntity<EmployeeDto> getEmployeeById(Long id) {
+        EmployeeDto dto = employeeService.getEmployeeById(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(dto);
+    }
+
+    @Operation(
+            summary = "Fetch employee details REST API by name and last name",
+            description = "REST API to fetch employees details by name and last name"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDto.class)
+                    )
+            )
+    })
+    @GetMapping("/fetchByName")
+    public ResponseEntity<EmployeeDto> getEmployeeByNameAndLastName(
+                    @NotEmpty @RequestParam String name,
+                    @NotEmpty @RequestParam String lastName) {
         EmployeeDto dto = employeeService.getEmployeeByNameAndLastName(name, lastName);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -102,8 +129,10 @@ public class EmployeeController {
                     )
             )
     })
-    @GetMapping("/phone")
-    public ResponseEntity<EmployeeDto> getEmployeebyPhone(@Valid @RequestParam String phone) {
+    @GetMapping("/fetchByPhone")
+    public ResponseEntity<EmployeeDto> getEmployeeByPhone(
+                    @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
+                    @Valid @RequestParam String phone) {
         EmployeeDto dto = employeeService.getEmployeeByPhone(phone);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -127,18 +156,40 @@ public class EmployeeController {
                     )
             )
     })
-    @PostMapping
-    public ResponseEntity<ResponseDto> create(@Valid @RequestBody EmployeeDto dto) {
+
+    @PostMapping( "/createEmployee")
+    public ResponseEntity<ResponseDto> createEmployee(@Valid @RequestBody EmployeeDto dto) {
         employeeService.createEmployee(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ResponseDto(ProjectConstants.STATUS_201, ProjectConstants.MESSAGE_201));
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseDto> update(@Valid @RequestBody EmployeeDto dto) {
-        EmployeeDto updatedEmployee = employeeService.updateEmployee(dto);
-        if (updatedEmployee != null) {
+    @Operation(
+            summary = "Update Employee Details REST API",
+            description = "REST API to update Employee details based on a new EmployeeDto"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "417",
+                    description = "Expectation Failed"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDto.class)
+                    )
+            )
+    })
+    @PutMapping("/updateEmployee")
+    public ResponseEntity<ResponseDto> updateEmployee(@Valid @RequestBody EmployeeDto dto) {
+        boolean updatedEmployee = employeeService.updateEmployee(dto);
+        if (updatedEmployee) {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseDto(ProjectConstants.STATUS_200, ProjectConstants.MESSAGE_200));
@@ -149,8 +200,30 @@ public class EmployeeController {
         }
     }
 
+    @Operation(
+            summary = "Delete Employee REST API",
+            description = "REST API to delete Employee based on id"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "417",
+                    description = "Expectation Failed"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDto.class)
+                    )
+            )
+    }
+    )
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseDto> delete(@PathVariable Long id) {
+    public ResponseEntity<ResponseDto> deleteEmployee(@PathVariable Long id) {
         boolean isDeleted = employeeService.deleteEmployee(id);
         if (isDeleted) {
             return ResponseEntity

@@ -15,6 +15,7 @@ public class Department extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "department_name", unique = true)
     private String name;
 
     @Column(name = "department_code", unique = true)

@@ -51,7 +51,7 @@ public class EmployeeDto extends BaseDto {
 
     @CheckPhone
     @NotBlank(message = "Phone number is required")
-    @Size(min = 9, max = 9, message = "Pho number must be exactly 9 digits long")
+    @Size(min = 10, max = 10, message = "Pho number must be exactly 10 digits long")
     private String phoneNumber;
 
     @Schema(
