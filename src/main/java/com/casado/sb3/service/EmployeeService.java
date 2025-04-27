@@ -26,26 +26,19 @@ public class EmployeeService {
         return employeeMapper.toDtoList(all);
     }
 
-    public EmployeeDto getEmployeeByNameAndLastName(String name, String lastName) {
-        return employeeRepository.findByNameAndLastNameIgnoreCase(name.trim(), lastName.trim())
-                .map(employeeMapper::toDto)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-    }
-
-    public EmployeeDto getEmployeeByPhone(String phoneNumber) {
-        return employeeRepository.findByPhoneNumber(phoneNumber)
+    public EmployeeDto getEmployeeById(Long id) {
+        return employeeRepository.findById(id)
                 .map(employeeMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
     }
 
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
 
-        Optional<Employee> existing = employeeRepository.findByNameAndLastNameIgnoreCase(employeeDto.getName(), employeeDto.getLastName());
+        Optional<Employee> existing = employeeRepository.findById(employeeDto.getId());
         if (!existing.isPresent()) {
             Employee newEmployee = new Employee();
             newEmployee.setName(employeeDto.getName());
-            newEmployee.setEmail(employeeDto.getEmail());
-            Optional<Department> existsDepartment = departmentRepository.findById(employeeDto.getDepartmentId());
+            Optional<Department> existsDepartment = departmentRepository.findById(employeeDto.getDepartmentId()); // employeeDto.getDepartmentId()
 
             if (existsDepartment.isPresent()) {
                 newEmployee.setDepartment(existsDepartment.get()); // preserve existing relations if needed
@@ -61,17 +54,18 @@ public class EmployeeService {
         throw new EntityNotFoundException("Employee already exists");
     }
 
-    public EmployeeDto updateEmployee(EmployeeDto employeeDto) {
-        Employee existing = employeeRepository.findByNameAndLastNameIgnoreCase(employeeDto.getName(), employeeDto.getLastName())
+    public EmployeeDto updateEmployee(Long id, EmployeeDto dto) {
+        Employee existing = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-        Employee updated = employeeMapper.toEntity(employeeDto);
+        dto.setId(id); // make sure ID matches
+        Employee updated = employeeMapper.toEntity(dto);
         updated.setDepartment(existing.getDepartment()); // preserve existing relations if needed
+
         return employeeMapper.toDto(employeeRepository.save(updated));
     }
 
-    public boolean deleteEmployee(Long id) {
+    public void deleteEmployee(Long id) {
         employeeRepository.deleteById(id);
-        return true;
     }
 }

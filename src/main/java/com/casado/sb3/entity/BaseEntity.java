@@ -30,10 +30,10 @@ public abstract class BaseEntity {
     private String createdBy;
 
     @LastModifiedDate
-    @Column
+    @Column(insertable = false)
     private LocalDateTime updatedAt;
 
     @LastModifiedBy
-    @Column
+    @Column(insertable = false)
     private String updatedBy;
 }

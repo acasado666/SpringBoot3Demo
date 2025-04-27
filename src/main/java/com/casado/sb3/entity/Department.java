@@ -17,16 +17,6 @@ public class Department extends BaseEntity {
 
     private String name;
 
-    @Column(name = "department_code", unique = true)
-    private String departmentCode;
-
-    private String description;
-
-    @Column(name = "department_location", unique = true)
-    private String building;
-
-    private String phoneNumber;
-
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Employee> employees;
 }
